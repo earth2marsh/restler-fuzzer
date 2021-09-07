@@ -373,5 +373,37 @@ module Dependencies =
 
             Assert.True(grammar.Contains("""restler_custom_payload("/subnets/{subnetName}/get/__body__", quoted=False)"""))
 
+        [<Fact>]
+        let ``response headers can be used as producers`` () =
+            let grammarOutputDirPath = ctx.testRootDirPath
+            let config = { Restler.Config.SampleConfig with
+                             IncludeOptionalParameters = true
+                             GrammarOutputDirectoryPath = Some grammarOutputDirPath
+                             ResolveBodyDependencies = true
+                             UseBodyExamples = Some true
+                             SwaggerSpecFilePath = Some [(Path.Combine(Environment.CurrentDirectory, @"swagger\dependencyTests\response_headers.json"))]
+                             CustomDictionaryFilePath = None
+                             AnnotationFilePath = None
+                             AllowGetProducers = true
+                         }
+            Restler.Workflow.generateRestlerGrammar None config
+
+            let grammarFilePath = Path.Combine(grammarOutputDirPath,
+                                               Restler.Workflow.Constants.DefaultRestlerGrammarFileName)
+            let grammar = File.ReadAllText(grammarFilePath)
+
+            Assert.True(true)
+
+
+            // Confirm the same works with annotations
+            let configWithAnnotations = { config with
+                                            AnnotationFilePath = Some (Path.Combine(Environment.CurrentDirectory, @"swagger\dependencyTests\response_headers_annotations.json"))}
+            Restler.Workflow.generateRestlerGrammar None configWithAnnotations
+
+            let grammarFilePath = Path.Combine(grammarOutputDirPath,
+                                                Restler.Workflow.Constants.DefaultRestlerGrammarFileName)
+            let grammar = File.ReadAllText(grammarFilePath)
+            ()
+
         interface IClassFixture<Fixtures.TestSetupAndCleanup>
 
